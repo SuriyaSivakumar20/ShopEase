@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShopEase - SAP Inspired</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#4F46E5",
+              secondary: "#EC4899",
+            },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      .cart-panel, .analytics-panel, .checkout-page {
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 100%;
+        max-width: 600px;
+        height: 100%;
+        background: white;
+        box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+        z-index: 50;
+      }
+      .cart-panel.open, .analytics-panel.open, .checkout-page.open {
+        transform: translateX(0);
+      }
+      #main-content { transition: opacity 0.3s; }
+      #main-content.hidden { opacity: 0; pointer-events: none; }
+      .order-success { display: none; text-align: center; padding: 20px; }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <div id="main-content">
+      <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-8">
+              <a href="#" class="text-2xl font-['Pacifico'] text-primary">ShopEase</a>
+              <nav class="hidden md:flex space-x-6">
+                <a href="#" class="text-gray-600 hover:text-primary">Home</a>
+                <div class="relative group">
+                  <button class="flex items-center text-gray-600 hover:text-primary">
+                    Categories
+                    <i class="ri-arrow-down-s-line ml-1"></i>
+                  </button>
+                  <div class="absolute top-full left-0 mt-2 w-48 bg-white rounded shadow-lg py-2 hidden group-hover:block">
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Electronics</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Fashion</a>
+                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Home & Living</a>
+                  </div>
+                </div>
+                <a href="#" class="text-gray-600 hover:text-primary">Deals</a>
+                <a href="#" class="text-gray-600 hover:text-primary">Contact</a>
+              </nav>
+            </div>
+            <div class="flex-1 max-w-2xl mx-8">
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="ri-search-line text-gray-400"></i>
+                </div>
+                <input type="text" id="searchInput" class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-button text-sm" placeholder="Search products..." />
+              </div>
+            </div>
+            <div class="flex items-center space-x-4">
+              <button class="relative p-2 rounded-button hover:bg-gray-100" id="analyticsBtn">
+                <i class="ri-bar-chart-line text-gray-600"></i>
+              </button>
+              <button class="relative p-2 rounded-button hover:bg-gray-100" id="cartBtn">
+                <i class="ri-shopping-cart-line text-gray-600"></i>
+                <span class="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center" id="cartCount">0</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="bg-gradient-to-r from-primary/10 to-secondary/10 py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="text-center">
+            <h2 class="text-3xl font-bold text-gray-900">Flash Sale</h2>
+            <p class="mt-4 text-lg text-gray-600">Don't miss out on these amazing deals!</p>
+            <div class="mt-8 flex justify-center space-x-4 text-2xl font-bold">
+              <div class="bg-white rounded-lg p-4 w-20 text-center">
+                <span class="text-primary" id="hours">24</span>
+                <div class="text-sm font-normal text-gray-500">Hours</div>
+              </div>
+              <div class="bg-white rounded-lg p-4 w-20 text-center">
+                <span class="text-primary" id="minutes">00</span>
+                <div class="text-sm font-normal text-gray-500">Minutes</div>
+              </div>
+              <div class="bg-white rounded-lg p-4 w-20 text-center">
+                <span class="text-primary" id="seconds">00</span>
+                <div class="text-sm font-normal text-gray-500">Seconds</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <main class="py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex gap-6">
+            <aside class="w-64 flex-shrink-0">
+              <div class="bg-white p-4 rounded shadow-sm">
+                <h3 class="font-semibold text-gray-900 mb-4">Filters</h3>
+                <div class="space-y-4">
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Categories</h4>
+                    <div class="space-y-2">
+                      <label class="flex items-center">
+                        <input type="checkbox" class="rounded text-primary" onchange="applyFilters()" data-category="Electronics" />
+                        <span class="ml-2 text-sm text-gray-600">Electronics</span>
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" class="rounded text-primary" onchange="applyFilters()" data-category="Fashion" />
+                        <span class="ml-2 text-sm text-gray-600">Fashion</span>
+                      </label>
+                      <label class="flex items-center">
+                        <input type="checkbox" class="rounded text-primary" onchange="applyFilters()" data-category="Home & Living" />
+                        <span class="ml-2 text-sm text-gray-600">Home & Living</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Price Range</h4>
+                    <div class="space-y-2">
+                      <input type="range" min="0" max="1000" value="500" class="w-full" id="priceRange" oninput="applyFilters()" />
+                      <div class="flex justify-between text-sm text-gray-600">
+                        <span>$0</span>
+                        <span id="priceValue">$500</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </aside>
+            <div class="flex-1">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="productGrid"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Cart Panel -->
+    <div class="cart-panel">
+      <div class="h-full flex flex-col">
+        <div class="p-4 border-b">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Shopping Cart</h2>
+            <button class="p-2 rounded-button hover:bg-gray-100" id="closeCartBtn">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4" id="cartItems">
+          <div class="text-center text-gray-500 mt-8">Your cart is empty</div>
+        </div>
+        <div class="p-4 border-t">
+          <div class="flex justify-between mb-4">
+            <span class="font-medium">Subtotal</span>
+            <span class="font-semibold" id="cartSubtotal">$0.00</span>
+          </div>
+          <button class="w-full bg-primary text-white py-2 rounded-button hover:bg-primary/90" id="checkoutBtn">
+            Proceed to Checkout
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Panel -->
+    <div class="analytics-panel">
+      <div class="h-full flex flex-col">
+        <div class="p-4 border-b">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Analytics Dashboard</h2>
+            <button class="p-2 rounded-button hover:bg-gray-100" id="closeAnalyticsBtn">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4" id="analyticsContent">
+          <div class="space-y-4">
+            <div>
+              <h3 class="font-medium">Total Sales</h3>
+              <p class="text-lg font-semibold" id="totalSales">$0.00</p>
+            </div>
+            <div>
+              <h3 class="font-medium">Items Sold</h3>
+              <p class="text-lg font-semibold" id="itemsSold">0</p>
+            </div>
+            <div>
+              <h3 class="font-medium">Low Stock Alerts</h3>
+              <ul class="text-sm text-gray-600" id="lowStockList"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checkout Page -->
+    <div class="checkout-page" id="checkoutPage">
+      <div class="h-full flex flex-col">
+        <div class="p-4 border-b">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold">Checkout</h2>
+            <button class="p-2 rounded-button hover:bg-gray-100" id="closeCheckoutBtn">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4">
+          <div class="space-y-4">
+            <h3 class="font-medium text-gray-900">Order Summary</h3>
+            <div id="orderSummary" class="space-y-2"></div>
+            <div class="flex justify-between font-semibold">
+              <span>Total</span>
+              <span id="orderTotal">$0.00</span>
+            </div>
+            <h3 class="font-medium text-gray-900 mt-4">Payment Method</h3>
+            <div class="space-y-2">
+              <label class="flex items-center">
+                <input type="radio" name="payment" value="credit" class="mr-2" checked />
+                <span>Credit/Debit Card</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="payment" value="upi" class="mr-2" onclick="showUPIQR()" />
+                <span>UPI</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" name="payment" value="cod" class="mr-2" />
+                <span>Cash on Delivery</span>
+              </label>
+            </div>
+            <div id="upiQR" class="hidden mt-4 text-center">
+              <p class="text-sm text-gray-600">Scan to pay via UPI</p>
+              <canvas id="qrCodeCanvas" class="mx-auto mt-2"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 border-t">
+          <button class="w-full bg-primary text-white py-2 rounded-button hover:bg-primary/90" id="placeOrderBtn">
+            Place Order
+          </button>
+        </div>
+        <div class="order-success" id="orderSuccess">
+          <h2 class="text-2xl font-bold text-green-600">Order Placed Successfully!</h2>
+          <p class="mt-2 text-gray-600">Thank you for your purchase. Your order is being processed.</p>
+          <button class="mt-4 bg-primary text-white py-2 px-4 rounded-button hover:bg-primary/90" onclick="resetToMain()">
+            Back to Shopping
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Centralized "SAP-like" in-memory database
+      const dataStore = {
+        products: [
+          { id: 1, name: "Wireless Noise-Cancelling Headphones", price: 299.99, stock: 15, image: "https://public.readdy.ai/ai/img_res/fafa978e9a39b7bf46184cfe8b192d4a.jpg", category: "Electronics" },
+          { id: 2, name: "Smart Fitness Watch", price: 199.99, stock: 8, image: "https://public.readdy.ai/ai/img_res/6c7cee3113a4a57540c58144f47bd87a.jpg", category: "Electronics" },
+          { id: 3, name: "Premium Coffee Maker", price: 159.99, stock: 12, image: "https://public.readdy.ai/ai/img_res/34d96305a6f9180aa77e570a6461bc26.jpg", category: "Home & Living" },
+          { id: 4, name: "4K Ultra HD Smart TV", price: 599.99, stock: 5, image: "https://images.unsplash.com/photo-1593305841991-2b16a81a61c9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", category: "Electronics" },
+          { id: 5, name: "Leather Messenger Bag", price: 129.99, stock: 20, image: "https://images.unsplash.com/photo-1584278432090-2461809dc8f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", category: "Fashion" },
+          { id: 6, name: "Bluetooth Portable Speaker", price: 89.99, stock: 25, image: "https://images.unsplash.com/photo-1605649487212-47bdab064df7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", category: "Electronics" },
+          { id: 7, name: "Ergonomic Office Chair", price: 249.99, stock: 10, image: "https://images.unsplash.com/photo-1596162954151-cacb9126ec63?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", category: "Home & Living" },
+          { id: 8, name: "Stainless Steel Cookware Set", price: 179.99, stock: 7, image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", category: "Home & Living" },
+        ],
+        cart: { items: [], total: 0 },
+        orders: [],
+      };
+
+      // Cart management
+      const cart = {
+        addToCart(productId) {
+          const product = dataStore.products.find((p) => p.id === productId);
+          if (product && product.stock > 0) {
+            dataStore.cart.items.push({ ...product });
+            dataStore.cart.total += product.price;
+            product.stock--;
+            updateCart();
+            renderProducts();
+            updateAnalytics();
+          }
+        },
+        removeFromCart(productId) {
+          const index = dataStore.cart.items.findIndex((item) => item.id === productId);
+          if (index > -1) {
+            const product = dataStore.products.find((p) => p.id === productId);
+            dataStore.cart.total -= dataStore.cart.items[index].price;
+            dataStore.cart.items.splice(index, 1);
+            product.stock++;
+            updateCart();
+            renderProducts();
+            updateAnalytics();
+          }
+        },
+      };
+
+      function startCountdown() {
+        const endTime = new Date();
+        endTime.setHours(endTime.getHours() + 24);
+        function updateCountdown() {
+          const now = new Date();
+          const diff = endTime - now;
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          document.getElementById("hours").textContent = hours.toString().padStart(2, "0");
+          document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
+          document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
+          if (diff > 0) setTimeout(updateCountdown, 1000);
+        }
+        updateCountdown();
+      }
+
+      function renderProducts(productsToRender = dataStore.products) {
+        const grid = document.getElementById("productGrid");
+        grid.innerHTML = productsToRender
+          .map(
+            (product) => `
+              <div class="bg-white rounded shadow-sm overflow-hidden">
+                <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover">
+                <div class="p-4">
+                  <h3 class="font-medium text-gray-900">${product.name}</h3>
+                  <div class="mt-2 flex items-center justify-between">
+                    <span class="text-lg font-semibold">$${product.price.toFixed(2)}</span>
+                    <span class="text-sm ${product.stock > 0 ? "text-green-600" : "text-red-600"}">
+                      ${product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+                    </span>
+                  </div>
+                  <div class="mt-4 flex space-x-2">
+                    <button class="flex-1 bg-primary text-white py-2 rounded-button hover:bg-primary/90 ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}" onclick="cart.addToCart(${product.id})" ${product.stock === 0 ? 'disabled' : ''}>
+                      Add to Cart
+                    </button>
+                    <button class="p-2 border rounded-button hover:bg-gray-50" onclick="quickView(${product.id})" title="View Details">
+                      <i class="ri-external-link-line"></i>
+                    </button>
+                    <button class="p-2 border rounded-button hover:bg-gray-50" onclick="toggleWishlist(${product.id})" data-wishlist="${product.id}">
+                      <i class="ri-heart-line"></i>
+                    </button>
+                  </div>
+                  <div class="mt-2">
+                    <div class="flex items-center">
+                      <div class="flex text-yellow-400">
+                        <i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-fill"></i><i class="ri-star-half-fill"></i>
+                      </div>
+                      <span class="ml-2 text-sm text-gray-500">(${Math.floor(Math.random() * 100) + 50} reviews)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `,
+          )
+          .join("");
+      }
+
+      function updateCart() {
+        const cartItems = document.getElementById("cartItems");
+        const cartCount = document.getElementById("cartCount");
+        const cartSubtotal = document.getElementById("cartSubtotal");
+        cartCount.textContent = dataStore.cart.items.length;
+        cartSubtotal.textContent = `$${dataStore.cart.total.toFixed(2)}`;
+        cartItems.innerHTML = dataStore.cart.items.length === 0
+          ? '<div class="text-center text-gray-500 mt-8">Your cart is empty</div>'
+          : dataStore.cart.items.map(
+              (item) => `
+                <div class="flex items-center py-4 border-b">
+                  <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
+                  <div class="ml-4 flex-1">
+                    <h4 class="font-medium text-gray-900">${item.name}</h4>
+                    <div class="mt-1 flex items-center justify-between">
+                      <span class="text-gray-600">$${item.price.toFixed(2)}</span>
+                      <button class="text-red-500 hover:text-red-600 p-2 rounded-button" onclick="cart.removeFromCart(${item.id})">
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `,
+            ).join("");
+      }
+
+      function updateAnalytics() {
+        const totalSales = dataStore.orders.reduce((sum, order) => sum + order.total, 0);
+        const itemsSold = dataStore.orders.reduce((sum, order) => sum + order.items.length, 0);
+        const lowStock = dataStore.products.filter((p) => p.stock <= 5);
+        document.getElementById("totalSales").textContent = `$${totalSales.toFixed(2)}`;
+        document.getElementById("itemsSold").textContent = itemsSold;
+        document.getElementById("lowStockList").innerHTML = lowStock.length === 0
+          ? "<li>No low stock items</li>"
+          : lowStock.map((p) => `<li>${p.name}: ${p.stock} left</li>`).join("");
+      }
+
+      function showCheckoutPage() {
+        if (dataStore.cart.items.length === 0) return alert("Cart is empty!");
+        document.getElementById("main-content").classList.add("hidden");
+        document.querySelector(".cart-panel").classList.remove("open");
+        const checkoutPage = document.getElementById("checkoutPage");
+        checkoutPage.classList.add("open");
+        const orderSummary = document.getElementById("orderSummary");
+        orderSummary.innerHTML = dataStore.cart.items.map(item => `
+          <div class="flex justify-between">
+            <span>${item.name}</span>
+            <span>$${item.price.toFixed(2)}</span>
+          </div>
+        `).join("");
+        document.getElementById("orderTotal").textContent = `$${dataStore.cart.total.toFixed(2)}`;
+        document.getElementById("orderSuccess").style.display = "none";
+        document.getElementById("upiQR").classList.add("hidden");
+      }
+
+      function showUPIQR() {
+        const upiQR = document.getElementById("upiQR");
+        upiQR.classList.remove("hidden");
+        const canvas = document.getElementById("qrCodeCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 150;
+        canvas.height = 150;
+        // Simple QR code simulation (real QR would need a library or API)
+        const upiLink = `upi://pay?pa=example@upi&pn=ShopEase&am=${dataStore.cart.total.toFixed(2)}&cu=INR`;
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, 150, 150);
+        ctx.fillStyle = "black";
+        for (let i = 0; i < 100; i++) {
+          const x = Math.floor(Math.random() * 130) + 10;
+          const y = Math.floor(Math.random() * 130) + 10;
+          ctx.fillRect(x, y, 5, 5);
+        }
+        console.log("Simulated UPI Link:", upiLink); // For demo; real QR would encode this
+      }
+
+      function quickView(productId) {
+        alert(`View details for product ID: ${productId} (SAP integration point)`);
+      }
+
+      function applyFilters() {
+        const selectedCategories = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.dataset.category);
+        const maxPrice = parseInt(document.getElementById("priceRange").value);
+        document.getElementById("priceValue").textContent = `$${maxPrice}`;
+        const filteredProducts = dataStore.products.filter(product => 
+          (selectedCategories.length === 0 || selectedCategories.includes(product.category)) &&
+          product.price <= maxPrice
+        );
+        renderProducts(filteredProducts);
+      }
+
+      function simulateRealTimeUpdates() {
+        setInterval(() => {
+          dataStore.products.forEach(product => {
+            if (Math.random() < 0.1 && product.stock > 0) {
+              product.stock--;
+              console.log(`Stock update: ${product.name} now has ${product.stock} in stock`);
+            }
+          });
+          renderProducts();
+          updateAnalytics();
+        }, 5000);
+      }
+
+      function resetToMain() {
+        document.getElementById("checkoutPage").classList.remove("open");
+        document.getElementById("main-content").classList.remove("hidden");
+        renderProducts();
+        updateCart();
+        updateAnalytics();
+      }
+
+      // Event Listeners
+      document.getElementById("cartBtn").addEventListener("click", () => {
+        document.querySelector(".cart-panel").classList.add("open");
+      });
+
+      document.getElementById("closeCartBtn").addEventListener("click", () => {
+        document.querySelector(".cart-panel").classList.remove("open");
+      });
+
+      document.getElementById("analyticsBtn").addEventListener("click", () => {
+        document.querySelector(".analytics-panel").classList.add("open");
+      });
+
+      document.getElementById("closeAnalyticsBtn").addEventListener("click", () => {
+        document.querySelector(".analytics-panel").classList.remove("open");
+      });
+
+      document.getElementById("checkoutBtn").addEventListener("click", showCheckoutPage);
+
+      document.getElementById("closeCheckoutBtn").addEventListener("click", () => {
+        document.getElementById("checkoutPage").classList.remove("open");
+        document.getElementById("main-content").classList.remove("hidden");
+      });
+
+      document.getElementById("placeOrderBtn").addEventListener("click", () => {
+        dataStore.orders.push({ items: [...dataStore.cart.items], total: dataStore.cart.total });
+        dataStore.cart.items = [];
+        dataStore.cart.total = 0;
+        document.querySelector(".checkout-page > div > div:nth-child(2)").style.display = "none"; // Hide payment section
+        document.getElementById("orderSuccess").style.display = "block";
+        updateAnalytics();
+      });
+
+      const wishlist = new Set();
+      function toggleWishlist(productId) {
+        const wishlistBtn = document.querySelector(`[data-wishlist="${productId}"]`);
+        if (wishlist.has(productId)) {
+          wishlist.delete(productId);
+          wishlistBtn.classList.remove("text-red-500");
+        } else {
+          wishlist.add(productId);
+          wishlistBtn.classList.add("text-red-500");
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        renderProducts();
+        updateCart();
+        updateAnalytics();
+        startCountdown();
+        simulateRealTimeUpdates();
+        document.getElementById("searchInput").addEventListener("input", (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          const filteredProducts = dataStore.products.filter(product =>
+            product.name.toLowerCase().includes(searchTerm)
+          );
+          renderProducts(filteredProducts);
+        });
+      });
+    </script>
+  </body>
+</html>
